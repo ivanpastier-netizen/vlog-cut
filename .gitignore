@@ -1,0 +1,36 @@
+# personal config and state
+config.json
+pending.json
+profile.md
+# media and work dirs
+*.mp4
+*.m4v
+*.mov
+*.mkv
+*.MP4
+*.MOV
+*.wav
+*.mp3
+*.jpg
+*.jpeg
+*.png
+*.heic
+work/
+work4k/
+proxies/
+thumbs/
+sheets/
+words/
+wav/
+*-ingest/
+# generated per-project data
+clips_chrono.json
+clips_trip.json
+transcripts.json
+shot_index.json
+local_triage.json
+edl_*.json
+__pycache__/
+*.pyc
+*.bak*
+.DS_Store

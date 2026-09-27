@@ -1,0 +1,16 @@
+{
+  "_comment": "Copy to ~/.config/vlog-cut/config.json and edit. Every key is optional; env vars VLOG_<KEY> override it.",
+  "ingest_root": "~/Movies/vlog-ingest",
+  "music_lib": "~/Music/vlog",
+  "state_dir": "~/.config/vlog-cut",
+  "review_dir": "~/Desktop",
+  "review_hook": "",
+  "photos_library": "~/Pictures/Photos Library.photoslibrary",
+  "card_volume": "/Volumes/MY_CAMERA",
+  "whisper_python": "",
+  "whisper_model": "mlx-community/whisper-large-v3-mlx",
+  "language": "en",
+  "triage_model": "gemma4:12b",
+  "archive_host": "",
+  "archive_root": ""
+}
