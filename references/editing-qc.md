@@ -65,6 +65,29 @@ directly. `music.py usage` is a register of prior selections derived from local 
 - Title cards need an outline, not a drop shadow: in HLG the card white is capped (~75 %) and
   cannot out-brighten a bright scene. Check each card against the brightest frame it covers.
 
+## Toolbox beyond beat cuts
+
+A music-led cut with a few hard "stops" (music cuts out, one real spoken line, music slams
+back) is the spine. These keep it from feeling like one trick repeated; the renderer supports
+all of them as EDL clip fields:
+
+- **Thesis line first.** One sentence on what the cut is about. The cold open poses it, the
+  last stop answers it, the final shot calls back to the first image.
+- **J-cut** (`alead: 0.3–0.6`): the voice starts under the previous shot, then the picture
+  cuts to the speaker. **L-cut** (`adur` > `dur`): the line runs over the next b-roll. Keep
+  overlaps under ~0.8 s.
+- **Ambience bed** (`audio: "bed"`): b-roll plays its own sound ~16 dB under speech level and
+  does not duck the music, so music never sits on dead silence.
+- **Freeze frame** (`hold: 0.6–1.2`, inside `dur`) on a punchline or under a title.
+- **Time passing**: one long static take at `speed: 8–16`, then a hard cut to real time.
+- **Repetition montage**: 6–10 shots of the same gesture across days, one beat each.
+- **Sentence ends come from the audio, not the transcript.** ASR word ends land early on the
+  last syllable; extend each spoken line until the source audio drops ~15 dB below the line's
+  level (cap ~0.8 s, never into the next word), or endings get clipped.
+- **Second-batch shot list**: ship each review with a short list of shots that would improve
+  this cut (a to-camera line for the cold open, an establishing shot per place, a time-passing
+  shot, a detail insert, a closing callback), so the next batch can be slotted in.
+
 ## Hard edit invariants
 
 - **No rewinds.** Adjacent shots from the same source must not overlap: beat-snapped

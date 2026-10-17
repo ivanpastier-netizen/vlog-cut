@@ -161,6 +161,11 @@ for i,c in enumerate(e["clips"]):
             lv=f"romin={omin:.4f}:gomin={omin:.4f}:bomin={omin:.4f}:romax={omax:.4f}:gomax={omax:.4f}:bomax={omax:.4f}"
         vf.append(f"colorlevels={lv}")
     vf.append(f"fps={FPS}")
+    # "hold": seconds of FREEZE FRAME at the end of the shot (included in `dur`).
+    # tpad only pads once the input ENDS, so trim the moving part to dur-hold first.
+    if c.get("hold"):
+        vf.append(f"trim=duration={max(0.1,c['dur']-c['hold']):.3f}")
+        vf.append(f"tpad=stop_mode=clone:stop_duration={c['hold']+0.1:.3f}")
     if HLG: vf.append("format=p010le")
     # -frames:v, NOT -t: cutting segments by time lets the fps filter's boundary
     # rounding drop the last frame on ~1 in 4 shots. Individually that is 33 ms
@@ -181,8 +186,16 @@ total=e["total"]
 # 2. real-audio moments, normalised to sit above the ducked music
 items=[]
 for i,c in enumerate(e["clips"]):
-    if c.get("audio")!="nat": continue
-    raw=NA/f"raw{i:03d}.wav"; o=NA/f"n{i:03d}.wav"
+    # audio modes: "nat" = real sound up, music ducked; "bed" = the shot's own
+    # ambience UNDER the music (-16 dB below a nat line, no duck); "mute" = music only.
+    # "alead" (s) = J-CUT: the shot's sound starts this long BEFORE its picture, read
+    # from the same source earlier (tin-alead); source and timeline shift together, so
+    # synccheck still measures 0 lag. L-cut = `adur` longer than `dur`.
+    if c.get("audio") not in ("nat","bed"): continue
+    lead=min(float(c.get("alead") or 0), c["tin"], c["offset"])
+    tag=f"{'b' if c['audio']=='bed' else ''}{f'_j{lead:.2f}' if lead else ''}"
+    raw=NA/f"raw{i:03d}{tag}.wav"; o=NA/f"n{i:03d}{tag}.wav"
+    adur=(c.get("adur") or c["dur"])+lead
     if not raw.exists():
         # ⛔ `adur` — the audio may be SHORTER than the picture. A `d=` shot gets
         # stretched to the next beat so the grid stays aligned, and on a narration
@@ -191,8 +204,7 @@ for i,c in enumerate(e["clips"]):
         # cutting a sentence off mid-word and repeating a fragment of the next.
         # So the EDL records the sentence length as `adur` and the picture keeps
         # the beat-aligned `dur`.
-        adur=c.get("adur") or c["dur"]
-        run(["ffmpeg","-y","-v","error","-ss",f"{c['tin']:.4f}","-i",c["src"],"-t",f"{adur:.4f}",
+        run(["ffmpeg","-y","-v","error","-ss",f"{c['tin']-lead:.4f}","-i",c["src"],"-t",f"{adur:.4f}",
              "-vn","-ac","2","-ar","48000","-af","highpass=f=80",str(raw)],raw.name)
     # ⛔ A reviewer once described the narration audio as clicky and buzzing —
     # that was distortion, and the cause was this step: the gain was derived
@@ -222,8 +234,12 @@ for i,c in enumerate(e["clips"]):
                 f"offset={m2.get('target_offset',0)}:linear=true:print_format=summary")
         else:                      # fall back to single pass rather than to the old bug
             af="loudnorm=I=-17:TP=-1.5:LRA=11"
+        if c["audio"]=="bed":
+            af+=f",volume={c.get('gain',-16)}dB,afade=t=in:d=0.15,afade=t=out:st={max(0,adur-0.25):.3f}:d=0.25"
+        elif lead:
+            af+=f",afade=t=in:d={min(0.12,lead):.3f}"
         run(["ffmpeg","-y","-v","error","-i",str(raw),"-af",af,"-ar","48000",str(o)],o.name)
-    items.append((c["offset"],o))
+    items.append((c["offset"]-lead,o))
 # 3. music with duck automation
 for k,m in enumerate(e["music"]):
     o=MB/f"m{k}.wav"

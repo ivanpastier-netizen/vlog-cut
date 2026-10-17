@@ -2,7 +2,7 @@
 name: vlog-cut
 description: "Produce or revise personal/family vlogs locally on a Mac: ingest camera, card or Apple Photos footage, inspect and select shots, build a beat-aware EDL, render and QC a review copy, then publish the approved final. Use for 'cut my vlog', 'edit today's footage', 'I uploaded my videos', vlog feedback and re-cuts, short share cuts, and archiving a finished vlog."
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # vlog-cut
